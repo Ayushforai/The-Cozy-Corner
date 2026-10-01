@@ -4,10 +4,17 @@
   const main = document.getElementById("main-app");
   if (!overlay || !main) return;
 
+  function notifyMainReady() {
+    requestAnimationFrame(() => {
+      document.dispatchEvent(new CustomEvent("main-app-ready"));
+    });
+  }
+
   if (!cfg?.enabled) {
     overlay.classList.add("is-hidden");
     main.classList.remove("is-locked");
     main.classList.add("is-ready");
+    notifyMainReady();
     return;
   }
 
@@ -18,6 +25,7 @@
         overlay.classList.add("is-hidden");
         main.classList.remove("is-locked");
         main.classList.add("is-ready");
+        notifyMainReady();
         return;
       }
     } catch {
@@ -113,6 +121,7 @@
     setTimeout(() => {
       overlay.classList.add("is-hidden");
     }, cfg.fadeOutMs ?? 900);
+    notifyMainReady();
   }
 
   function scheduleMaxDuration() {

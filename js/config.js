@@ -166,11 +166,16 @@ window.SITE_CONFIG = {
 
   scrollReveal: {
     enabled: true,
-    /** Fade only (no slide) — smoother scroll in / out */
+    /** Smooth opacity while scrolling (each box fades in/out with scroll position) */
+    progressiveFade: true,
+    thresholdSteps: 24,
+    opacityBoost: 1.12,
+    /** Fade only (no slide) when progressiveFade is false */
     fadeOnly: true,
-    /** Fraction of element visible before fade-in starts (0–1) */
     threshold: 0.1,
     rootMargin: "0px 0px -4% 0px",
+    /** Tighter on phones so each Explore box animates as you scroll */
+    mobileRootMargin: "0px 0px -12% 0px",
     hideWhenLeaving: true,
     durationMs: 1300,
     staggerMs: 140,

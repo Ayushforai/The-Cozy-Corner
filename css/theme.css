@@ -106,6 +106,17 @@ html.reveal-fade-only .reveal.is-hidden {
   transform: translateY(-12px);
 }
 
+.reveal.reveal--progressive {
+  opacity: var(--reveal-opacity, 0);
+  transform: none;
+}
+
+.reveal.reveal--progressive.is-visible,
+.reveal.reveal--progressive.is-hidden {
+  opacity: var(--reveal-opacity, 0);
+  transform: none;
+}
+
 .reveal-stagger > * {
   transition-delay: calc(var(--stagger-index, 0) * var(--stagger-ms, 80ms));
 }
