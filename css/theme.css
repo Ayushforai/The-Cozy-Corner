@@ -79,10 +79,16 @@ a {
 
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(20px);
   transition:
-    opacity var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1),
-    transform var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--reveal-duration, 700ms) var(--reveal-ease, ease-in-out),
+    transform var(--reveal-duration, 700ms) var(--reveal-ease, ease-in-out);
+  will-change: opacity;
+}
+
+html.reveal-fade-only .reveal {
+  transform: none;
+  will-change: opacity;
 }
 
 .reveal.is-visible {
@@ -90,9 +96,14 @@ a {
   transform: translateY(0);
 }
 
+html.reveal-fade-only .reveal.is-visible,
+html.reveal-fade-only .reveal.is-hidden {
+  transform: none;
+}
+
 .reveal.is-hidden {
   opacity: 0;
-  transform: translateY(-16px);
+  transform: translateY(-12px);
 }
 
 .reveal-stagger > * {

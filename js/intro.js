@@ -53,15 +53,33 @@
   if (fallbackSub && cfg.fallback?.subline) {
     fallbackSub.textContent = cfg.fallback.subline;
   }
-  if (fallbackArt && window.SITE_CONFIG?.images?.panda) {
-    fallbackArt.src = window.SITE_CONFIG.images.panda;
-    fallbackArt.alt = "Panda mascot";
+  const resolve = window.resolveSitePath || ((p) => p);
+  const introImageKey = cfg.fallbackImageKey || "introArt";
+  const introImagePath =
+    cfg.fallbackImage ||
+    (introImageKey && window.SITE_CONFIG?.images?.[introImageKey]) ||
+    window.SITE_CONFIG?.images?.introArt ||
+    "";
+  if (fallbackArt && introImagePath) {
+    fallbackArt.src = resolve(introImagePath);
+    fallbackArt.alt = "";
   }
+
+  const rawIntro =
+    cfg.videoSrc || window.SITE_CONFIG?.videos?.introSrc || "";
+  const rawIntroPoster =
+    cfg.posterSrc || window.SITE_CONFIG?.videos?.introPosterSrc || "";
+  const resolvedVideoSrc = resolve(rawIntro);
+  const resolvedPosterSrc = resolve(rawIntroPoster);
+  const hasVideo = Boolean(rawIntro);
 
   if (skipBtn) {
     skipBtn.textContent = cfg.skipLabel ?? "Skip intro";
     skipBtn.hidden = !cfg.showSkipButton;
-    skipBtn.addEventListener("click", () => finishIntro());
+    skipBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      finishIntro();
+    });
   }
 
   function setupAudio() {
@@ -111,16 +129,6 @@
     setTimeout(cb, wait);
   }
 
-  const resolve = window.resolveSitePath || ((p) => p);
-  const rawIntro =
-    cfg.videoSrc || window.SITE_CONFIG?.videos?.introSrc || "";
-  const rawIntroPoster =
-    cfg.posterSrc || window.SITE_CONFIG?.videos?.introPosterSrc || "";
-  const resolvedVideoSrc = resolve(rawIntro);
-  const resolvedPosterSrc = resolve(rawIntroPoster);
-
-  const hasVideo = Boolean(rawIntro);
-
   if (hasVideo && video && videoWrap && fallback) {
     fallback.hidden = true;
     videoWrap.hidden = false;
@@ -149,9 +157,6 @@
     fallback.hidden = false;
     playAudio();
     scheduleMaxDuration();
-    const displayMs = cfg.fallback?.displayMs ?? 3200;
-    const minMs = cfg.minDurationMs ?? 2500;
-    setTimeout(finishIntro, Math.max(displayMs, minMs));
   } else {
     finishIntro();
   }

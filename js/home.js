@@ -16,9 +16,15 @@
 
   if (titleEl && site?.title) titleEl.textContent = site.title;
   if (taglineEl && site?.tagline) taglineEl.textContent = site.tagline;
-  if (headerMascot && images?.panda) {
-    headerMascot.src = images.panda;
-    headerMascot.alt = "Panda mascot";
+  if (headerMascot) {
+    const headerPath =
+      images?.siteHeader ||
+      images?.panda ||
+      "";
+    if (headerPath) {
+      headerMascot.src = headerPath;
+      headerMascot.alt = "";
+    }
   }
   if (heroSubtitle && home.heroSubtitle) heroSubtitle.textContent = home.heroSubtitle;
   if (heroBowl && images?.ramen) {
@@ -36,7 +42,7 @@
     li.style.setProperty("--stagger-index", String(index));
 
     const href = card.disabled ? "#" : card.href;
-    const imgSrc = images?.[card.imageKey] || images?.panda || "";
+    const imgSrc = images?.[card.imageKey] || images?.siteHeader || "";
 
     li.innerHTML = `
       <a class="nav-card__link" href="${href}" ${card.disabled ? 'aria-disabled="true" tabindex="-1"' : ""} data-card-id="${card.id}">

@@ -138,6 +138,8 @@ window.SITE_CONFIG = {
       /** Duration of fallback animation before allowing enter (ms) */
       displayMs: 3200,
     },
+    /** Key in images.* for intro cartoon (e.g. introArt) */
+    fallbackImageKey: "introArt",
     audio: {
       enabled: false,
       /** e.g. "assets/audio/intro.mp3" — plays alongside video or fallback */
@@ -164,20 +166,28 @@ window.SITE_CONFIG = {
 
   scrollReveal: {
     enabled: true,
-    /** Fraction of element visible before showing (0–1) */
-    threshold: 0.15,
-    rootMargin: "0px 0px -8% 0px",
+    /** Fade only (no slide) — smoother scroll in / out */
+    fadeOnly: true,
+    /** Fraction of element visible before fade-in starts (0–1) */
+    threshold: 0.1,
+    rootMargin: "0px 0px -4% 0px",
     hideWhenLeaving: true,
-    durationMs: 700,
-    staggerMs: 80,
+    durationMs: 1300,
+    staggerMs: 140,
+    easing: "ease-in-out",
   },
 
   images: {
-    /** Replace with your cartoon PNG/SVG paths */
-    panda: "assets/images/panda-paint.png",
+    /** Homepage: mascot beside site title ("The Cozy Corner") */
+    siteHeader: "assets/images/panda-paint.png",
+    /** Intro splash (Skip screen) — intro.fallbackImageKey */
+    introArt: "assets/images/panda-hand.png",
+    /** Puzzle page: image above "Puzzle It Up" title — puzzleGame.headerImageKey */
+    puzzleHeader: "assets/images/panda-paint.png",
+    /** Homepage Explore card for puzzle — navCards[].imageKey: "puzzleNav" */
+    puzzleNav: "assets/images/panda-cartoon.svg",
     ramen: "assets/images/cat ramen.png",
     bdaycat: "assets/images/cat-gift.png",
-    /** Music Lounge page header (homepage box uses imageKey: "ramen" on that card) */
     musicHeader: "assets/images/ramen-cartoon.svg",
   },
 
@@ -189,7 +199,7 @@ window.SITE_CONFIG = {
     title: "Puzzle It Up",
     subtitle: "Slide the tiles — restore the picture before time runs out.",
     profileHint: "Switch or manage profiles at the bottom of this page.",
-    headerImageKey: "panda",
+    headerImageKey: "puzzleHeader",
     /** localStorage key for profile + progress */
     storageKey: "pandaRamen.puzzleProfile",
     /** Max saved player profiles on this device */
@@ -304,7 +314,7 @@ window.SITE_CONFIG = {
         description: "Match tiles and chill with our panda chef.",
         href: "pages/puzzle.html",
         accent: "mustard",
-        imageKey: "panda",
+        imageKey: "puzzleNav",
       },
       {
         id: "music",
@@ -315,6 +325,6 @@ window.SITE_CONFIG = {
         imageKey: "ramen",
       },
     ],
-    footerNote: "Made with extra noodles · Lots of love n blessings · by the one & only",
+    footerNote: "Made with extra noodles · Lots of love n blessings · By the one you know :3",
   },
 };

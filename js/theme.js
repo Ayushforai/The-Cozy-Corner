@@ -14,6 +14,12 @@
     root.style.setProperty("--reveal-duration", `${reveal.durationMs}ms`);
     root.style.setProperty("--stagger-ms", `${reveal.staggerMs ?? 80}ms`);
   }
+  if (reveal?.easing) {
+    root.style.setProperty("--reveal-ease", reveal.easing);
+  }
+  if (reveal?.fadeOnly !== false) {
+    root.classList.add("reveal-fade-only");
+  }
   const intro = window.SITE_CONFIG?.intro;
   if (intro?.fadeOutMs) {
     root.style.setProperty("--intro-fade-ms", `${intro.fadeOutMs}ms`);

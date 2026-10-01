@@ -954,7 +954,7 @@
       hintEl.textContent = hint;
       hintEl.hidden = !hint;
     }
-    const key = c.headerImageKey || "panda";
+    const key = c.headerImageKey || "puzzleHeader";
     const imgPath = window.SITE_CONFIG?.images?.[key] || "";
     if (imgEl && imgPath) {
       imgEl.src = window.resolveSitePath(imgPath);
