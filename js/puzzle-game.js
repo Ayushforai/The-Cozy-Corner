@@ -66,6 +66,47 @@
     return cfg().moveAnimMs ?? 280;
   }
 
+  function victoryRevealTiming() {
+    const c = cfg();
+    return {
+      hold: c.victoryRevealHoldMs ?? 1600,
+      fade: c.victoryRevealFadeMs ?? 550,
+    };
+  }
+
+  function removeVictoryReveal() {
+    const existing = document.getElementById("puzzle-victory-reveal");
+    if (existing) existing.remove();
+  }
+
+  function showVictoryReveal(onDone) {
+    removeVictoryReveal();
+    if (!resolvedImageUrl) {
+      onDone();
+      return;
+    }
+    const aspect = window.PuzzleImage.getAspect();
+    const { hold, fade } = victoryRevealTiming();
+    const overlay = el("div", "puzzle-victory-reveal");
+    overlay.id = "puzzle-victory-reveal";
+    overlay.setAttribute("aria-hidden", "true");
+    const glow = el("div", "puzzle-victory-reveal__glow");
+    const frame = el("div", "puzzle-victory-reveal__frame");
+    frame.style.aspectRatio = `${aspect.w} / ${aspect.h}`;
+    frame.style.backgroundImage = `url("${resolvedImageUrl}")`;
+    glow.append(frame);
+    overlay.append(glow);
+    document.body.append(overlay);
+
+    window.setTimeout(() => {
+      overlay.classList.add("is-fading");
+      window.setTimeout(() => {
+        removeVictoryReveal();
+        onDone();
+      }, fade);
+    }, hold);
+  }
+
   function showProfileGate() {
     const list = window.PuzzleStorage.listProfiles();
     if (list.length > 0) {
@@ -543,33 +584,43 @@
   function onWin() {
     stopTimer();
     window.PuzzleTutorial?.closeModal();
-    if (isTutorialActive()) {
-      window.PuzzleStorage.recordLevelResult("tutorial", 0, timeLeft);
+    isAnimating = true;
+
+    const showClearedPopup = (stars, msg) => {
       window.PuzzleSounds.play("win");
-      showLevelCleared(0, "You're ready for the real levels. Head back and try Level 1.");
-      return;
-    }
-    const thresholds = cfg().starThresholds;
-    const stars = window.PuzzleEngine.starsForFinish(
-      timeLeft,
-      activeLevel.timeSec,
-      thresholds,
-      peekStarsSpent
-    );
-    window.PuzzleStorage.recordLevelResult(activeLevel.id, stars, timeLeft);
-    window.PuzzleSounds.play("win");
-    for (let i = 0; i < stars; i++) {
-      setTimeout(() => window.PuzzleSounds.play("star"), 200 + i * 180);
-    }
-    const msg =
-      stars === 3
-        ? "Perfect pace — three stars!"
-        : stars === 2
-          ? "Nice work — two stars!"
-          : stars === 1
-            ? "You made it — one star!"
-            : "Solved! (Peeks used up your stars this round.)";
-    showLevelCleared(stars, msg);
+      for (let i = 0; i < stars; i++) {
+        setTimeout(() => window.PuzzleSounds.play("star"), 200 + i * 180);
+      }
+      isAnimating = false;
+      showLevelCleared(stars, msg);
+    };
+
+    const afterReveal = () => {
+      if (isTutorialActive()) {
+        window.PuzzleStorage.recordLevelResult("tutorial", 0, timeLeft);
+        showClearedPopup(0, "You're ready for the real levels. Head back and try Level 1.");
+        return;
+      }
+      const thresholds = cfg().starThresholds;
+      const stars = window.PuzzleEngine.starsForFinish(
+        timeLeft,
+        activeLevel.timeSec,
+        thresholds,
+        peekStarsSpent
+      );
+      window.PuzzleStorage.recordLevelResult(activeLevel.id, stars, timeLeft);
+      const msg =
+        stars === 3
+          ? "Perfect pace — three stars!"
+          : stars === 2
+            ? "Nice work — two stars!"
+            : stars === 1
+              ? "You made it — one star!"
+              : "Solved! (Peeks used up your stars this round.)";
+      showClearedPopup(stars, msg);
+    };
+
+    showVictoryReveal(afterReveal);
   }
 
   function renderPlay(root) {

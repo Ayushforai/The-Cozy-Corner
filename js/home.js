@@ -9,7 +9,6 @@
   const titleEl = document.getElementById("site-title");
   const taglineEl = document.getElementById("site-tagline");
   const headerMascot = document.getElementById("header-mascot");
-  const heroTitle = document.getElementById("hero-title");
   const heroSubtitle = document.getElementById("hero-subtitle");
   const heroBowl = document.getElementById("hero-ramen");
   const navList = document.getElementById("nav-cards");
@@ -21,7 +20,6 @@
     headerMascot.src = images.panda;
     headerMascot.alt = "Panda mascot";
   }
-  if (heroTitle && home.heroTitle) heroTitle.textContent = home.heroTitle;
   if (heroSubtitle && home.heroSubtitle) heroSubtitle.textContent = home.heroSubtitle;
   if (heroBowl && images?.ramen) {
     heroBowl.src = images.ramen;

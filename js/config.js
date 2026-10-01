@@ -208,6 +208,9 @@ window.SITE_CONFIG = {
     /** Full picture flash at level start, then fade (ms) */
     previewHoldMs: 1000,
     previewFadeMs: 650,
+    /** Full image flash after solving, before level-cleared popup (ms) */
+    victoryRevealHoldMs: 1600,
+    victoryRevealFadeMs: 550,
     /** Swipe must move at least this many px to count */
     swipeThresholdPx: 22,
     /** Tile swap animation duration (ms) */
@@ -285,7 +288,6 @@ window.SITE_CONFIG = {
   },
 
   homepage: {
-    heroTitle: "The Cozy Corner",
     heroSubtitle: "Pick a path — puzzles, tunes, and more brewing soon.",
     navCards: [
       {
