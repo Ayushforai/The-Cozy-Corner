@@ -67,22 +67,25 @@
   }
 
   function showProfileGate() {
-    const profile = window.PuzzleStorage.loadProfile();
-    if (profile.displayName) {
+    const list = window.PuzzleStorage.listProfiles();
+    if (list.length > 0) {
       view = "map";
       render();
       return;
     }
-    view = "profile";
+    view = "profile-new";
     render();
   }
 
-  function renderProfileForm(root) {
-    const existing = window.PuzzleStorage.loadProfile().displayName;
+  function renderProfileForm(root, mode) {
+    const isEdit = mode === "edit";
+    const isNew = mode === "profile-new" || mode === "new";
+    const existing = isEdit ? window.PuzzleStorage.loadProfile().displayName : "";
     const panel = el("section", "puzzle-panel puzzle-panel--profile");
+    const atMax = !window.PuzzleStorage.canCreateProfile();
     panel.innerHTML = `
-      <h2 class="puzzle-panel__title">${existing ? "Your profile" : "Create your profile"}</h2>
-      <p class="puzzle-panel__sub">Your stars and level progress stay on this device.</p>
+      <h2 class="puzzle-panel__title">${isEdit ? "Edit name" : "Create a profile"}</h2>
+      <p class="puzzle-panel__sub">Up to ${window.PuzzleStorage.maxProfiles()} profiles per device — each keeps its own stars and levels.</p>
     `;
     const form = el("form", "puzzle-profile-form");
     const label = el("label", "puzzle-profile-form__label", "Display name");
@@ -94,20 +97,104 @@
     input.placeholder = "e.g. Ramen Chef";
     input.autocomplete = "nickname";
     if (existing) input.value = existing;
-    const btn = el("button", "puzzle-btn puzzle-btn--primary", existing ? "Save" : "Start playing");
+    const btn = el(
+      "button",
+      "puzzle-btn puzzle-btn--primary",
+      isEdit ? "Save name" : "Create & play"
+    );
     btn.type = "submit";
     form.append(label, input, btn);
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const name = input.value.trim() || "Player";
-      window.PuzzleStorage.setDisplayName(name);
+      if (isEdit) {
+        window.PuzzleStorage.setDisplayName(name);
+      } else {
+        if (!window.PuzzleStorage.canCreateProfile()) return;
+        window.PuzzleStorage.createProfile(name);
+      }
       window.PuzzleSounds.unlock();
       view = "map";
       render();
     });
     panel.append(form);
+    if (isEdit) {
+      const back = el("button", "puzzle-btn puzzle-btn--ghost puzzle-profile-form__back", "Back to levels");
+      back.type = "button";
+      back.addEventListener("click", () => {
+        view = "map";
+        render();
+      });
+      panel.append(back);
+    }
+    if (isNew && atMax) {
+      const note = el("p", "puzzle-panel__sub", "Profile limit reached. Delete a profile from the levels page to add another.");
+      panel.append(note);
+      btn.disabled = true;
+    }
     root.append(panel);
     input.focus();
+  }
+
+  function renderProfileSwitcher(parent) {
+    const section = el("section", "puzzle-profiles");
+    const heading = el("h2", "puzzle-profiles__title", "Profiles");
+    const list = window.PuzzleStorage.listProfiles();
+    const activeId = window.PuzzleStorage.getActiveProfileId();
+    const chips = el("div", "puzzle-profiles__chips");
+
+    list.forEach((p) => {
+      const chip = el("button", "puzzle-profile-chip" + (p.id === activeId ? " is-active" : ""));
+      chip.type = "button";
+      chip.textContent = p.displayName;
+      chip.title = `${p.totalStars} stars collected`;
+      chip.addEventListener("click", () => {
+        if (p.id === activeId) return;
+        window.PuzzleStorage.switchProfile(p.id);
+        render();
+      });
+      chips.append(chip);
+    });
+
+    section.append(heading, chips);
+
+    const actions = el("div", "puzzle-profiles__actions");
+    const canAdd = window.PuzzleStorage.canCreateProfile();
+    const newBtn = el("button", "puzzle-btn puzzle-btn--ghost", "New profile");
+    newBtn.type = "button";
+    newBtn.disabled = !canAdd;
+    if (!canAdd) newBtn.title = `Maximum ${window.PuzzleStorage.maxProfiles()} profiles`;
+    newBtn.addEventListener("click", () => {
+      view = "profile-new";
+      render();
+    });
+
+    const editBtn = el("button", "puzzle-btn puzzle-btn--ghost", "Edit name");
+    editBtn.type = "button";
+    editBtn.addEventListener("click", () => {
+      view = "profile-edit";
+      render();
+    });
+
+    const delBtn = el("button", "puzzle-btn puzzle-btn--ghost puzzle-profiles__delete", "Delete profile");
+    delBtn.type = "button";
+    delBtn.addEventListener("click", () => {
+      const current = window.PuzzleStorage.getActiveProfileId();
+      const name = window.PuzzleStorage.loadProfile().displayName || "this profile";
+      const ok = window.confirm(
+        `Delete "${name}"? Stars and level progress for this profile will be lost.`
+      );
+      if (!ok || !current) return;
+      window.PuzzleStorage.deleteProfile(current);
+      if (window.PuzzleStorage.listProfiles().length === 0) {
+        view = "profile-new";
+      }
+      render();
+    });
+
+    actions.append(newBtn, editBtn, delBtn);
+    section.append(actions);
+    parent.append(section);
   }
 
   function renderMap(root) {
@@ -162,15 +249,8 @@
       grid.append(card);
     });
 
-    const actions = el("div", "puzzle-map-actions");
-    const editBtn = el("button", "puzzle-btn puzzle-btn--ghost", "Edit name");
-    editBtn.type = "button";
-    editBtn.addEventListener("click", () => {
-      view = "profile";
-      render();
-    });
-    actions.append(editBtn);
-    root.append(header, grid, actions);
+    root.append(header, grid);
+    renderProfileSwitcher(root);
   }
 
   function starIcons(count, cumulative) {
@@ -793,8 +873,12 @@
     pointerDrag = null;
     selectedCell = null;
 
-    if (view === "profile") {
-      renderProfileForm(root);
+    if (view === "profile-edit") {
+      renderProfileForm(root, "edit");
+      return;
+    }
+    if (view === "profile-new" || view === "profile") {
+      renderProfileForm(root, "new");
       return;
     }
     if (view === "map") {
@@ -810,9 +894,15 @@
     const c = cfg();
     const titleEl = $("#puzzle-page-title");
     const subEl = $("#puzzle-page-sub");
+    const hintEl = $("#puzzle-page-profile-hint");
     const imgEl = $("#puzzle-page-mascot");
-    if (titleEl) titleEl.textContent = c.title || "Puzzle Game";
+    if (titleEl) titleEl.textContent = c.title || "Puzzle It Up";
     if (subEl) subEl.textContent = c.subtitle || "";
+    if (hintEl) {
+      const hint = c.profileHint || "";
+      hintEl.textContent = hint;
+      hintEl.hidden = !hint;
+    }
     const key = c.headerImageKey || "panda";
     const imgPath = window.SITE_CONFIG?.images?.[key] || "";
     if (imgEl && imgPath) {

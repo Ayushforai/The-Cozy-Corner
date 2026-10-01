@@ -4,7 +4,7 @@
  */
 window.SITE_CONFIG = {
   site: {
-    title: "Panda & Ramen",
+    title: "The Cozy Corner",
     tagline: "Cozy corners, noodle adventures",
   },
 
@@ -186,11 +186,14 @@ window.SITE_CONFIG = {
    * Put level art in assets/images/puzzle-levels/ (see README there).
    */
   puzzleGame: {
-    title: "Puzzle Game",
+    title: "Puzzle It Up",
     subtitle: "Slide the tiles — restore the picture before time runs out.",
+    profileHint: "Switch or manage profiles at the bottom of this page.",
     headerImageKey: "panda",
     /** localStorage key for profile + progress */
     storageKey: "pandaRamen.puzzleProfile",
+    /** Max saved player profiles on this device */
+    maxProfiles: 4,
     /** Optional MP3 paths (relative to site root). Leave "" to use built-in soft tones. */
     sounds: {
       move: "",
@@ -282,7 +285,7 @@ window.SITE_CONFIG = {
   },
 
   homepage: {
-    heroTitle: "Panda & Ramen Adventures.",
+    heroTitle: "The Cozy Corner",
     heroSubtitle: "Pick a path — puzzles, tunes, and more brewing soon.",
     navCards: [
       {
@@ -295,7 +298,7 @@ window.SITE_CONFIG = {
       },
       {
         id: "puzzle",
-        label: "Puzzle Game",
+        label: "Puzzle It Up",
         description: "Match tiles and chill with our panda chef.",
         href: "pages/puzzle.html",
         accent: "mustard",
