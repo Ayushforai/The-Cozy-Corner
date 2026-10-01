@@ -1,0 +1,15 @@
+# Python virtual environment
+webenv/
+
+# Secrets
+.env
+.env.*
+*.pem
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.swp
+
+# Cursor
+.cursor/

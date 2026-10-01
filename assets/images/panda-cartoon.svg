@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Cartoon panda">
+  <ellipse cx="100" cy="115" rx="72" ry="65" fill="#faf8f5" stroke="#3d3429" stroke-width="3"/>
+  <circle cx="58" cy="52" r="28" fill="#3d3429"/>
+  <circle cx="142" cy="52" r="28" fill="#3d3429"/>
+  <circle cx="58" cy="58" r="14" fill="#faf8f5"/>
+  <circle cx="142" cy="58" r="14" fill="#faf8f5"/>
+  <ellipse cx="78" cy="108" rx="14" ry="18" fill="#3d3429"/>
+  <ellipse cx="122" cy="108" rx="14" ry="18" fill="#3d3429"/>
+  <circle cx="78" cy="112" r="5" fill="#faf8f5"/>
+  <circle cx="122" cy="112" r="5" fill="#faf8f5"/>
+  <ellipse cx="100" cy="132" rx="10" ry="7" fill="#3d3429"/>
+  <path d="M88 145 Q100 158 112 145" fill="none" stroke="#3d3429" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="100" cy="175" rx="8" ry="5" fill="#f5d5d8" opacity="0.8"/>
+</svg>

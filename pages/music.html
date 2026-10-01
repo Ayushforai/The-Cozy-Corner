@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#faf8f5" />
+    <title>Music — Panda &amp; Ramen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="../css/music-page.css" />
+    <link rel="stylesheet" href="../css/mobile.css" />
+  </head>
+  <body>
+    <canvas id="snowfall-canvas" aria-hidden="true"></canvas>
+    <main class="app-shell page-music">
+      <a class="page-music__back" href="../index.html">← Back home</a>
+
+      <header class="page-music__header">
+        <img id="music-page-mascot" src="" alt="" />
+        <h1 id="music-page-title">Music lounge</h1>
+        <p id="music-page-sub"></p>
+      </header>
+
+      <div id="music-lounge-root" class="music-lounge"></div>
+
+      <p class="page-music__hint">
+        Spotify and YouTube Music play inside each box — you may need a Spotify or Google account for full playback.
+      </p>
+      <p id="music-page-note" class="page-music__note"></p>
+    </main>
+    <script src="../js/config.js"></script>
+    <script src="../js/media-path.js"></script>
+    <script src="../js/music-lounge.js"></script>
+    <script src="../js/theme.js"></script>
+    <script src="../js/snowfall.js"></script>
+  </body>
+</html>

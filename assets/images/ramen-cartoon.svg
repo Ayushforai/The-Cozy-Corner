@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Cartoon ramen bowl">
+  <ellipse cx="100" cy="155" rx="78" ry="22" fill="#3d3429" opacity="0.15"/>
+  <path d="M35 95 Q100 55 165 95 L155 145 Q100 175 45 145 Z" fill="#c45c4a" stroke="#3d3429" stroke-width="3"/>
+  <path d="M45 100 Q100 75 155 100 L148 138 Q100 158 52 138 Z" fill="#e8dcc8"/>
+  <ellipse cx="100" cy="108" rx="48" ry="18" fill="#c9a227" opacity="0.35"/>
+  <path d="M70 105 Q75 90 80 105" fill="none" stroke="#c9a227" stroke-width="4" stroke-linecap="round"/>
+  <path d="M95 102 Q100 85 105 102" fill="none" stroke="#c9a227" stroke-width="4" stroke-linecap="round"/>
+  <path d="M118 106 Q123 92 128 106" fill="none" stroke="#c9a227" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="88" cy="118" r="6" fill="#c45c4a"/>
+  <circle cx="112" cy="122" r="5" fill="#3d3429" opacity="0.5"/>
+  <path d="M165 88 L185 72" stroke="#3d3429" stroke-width="3" stroke-linecap="round"/>
+  <path d="M168 92 L188 76" stroke="#3d3429" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="55" cy="88" rx="12" ry="8" fill="#faf8f5" stroke="#3d3429" stroke-width="2"/>
+</svg>
