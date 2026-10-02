@@ -1,0 +1,76 @@
+.page-message {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  width: 100%;
+}
+
+.page-message__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: var(--color-red);
+  margin-bottom: 1.5rem;
+}
+
+.page-message__back:hover {
+  text-decoration: underline;
+}
+
+.page-message__header {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.page-message__header img {
+  width: 88px;
+  margin: 0 auto 1rem;
+  filter: drop-shadow(0 4px 8px rgba(61, 52, 41, 0.12));
+}
+
+.page-message__header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  margin: 0;
+  color: var(--color-red);
+}
+
+.page-message__sub {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  font-family: var(--font-body);
+}
+
+.message-box {
+  border-radius: var(--radius-xl);
+  padding: 1.75rem 1.5rem;
+  background: rgba(250, 248, 245, 0.92);
+  border: 2px solid var(--color-beige);
+  box-shadow: var(--shadow-card);
+}
+
+.message-box__body {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+
+.message-box__body p {
+  margin: 0 0 1rem;
+}
+
+.message-box__body p:last-child {
+  margin-bottom: 0;
+}
+
+.page-message__note {
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.55;
+  font-family: var(--font-body);
+}

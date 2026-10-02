@@ -9,15 +9,16 @@
   let w = 0;
   let h = 0;
   let raf = 0;
-  const baseColor = cfg.color ?? "245, 213, 216";
 
-  function parseRgb() {
-    const m = String(baseColor).match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+  function parseRgbTriplet(str, fallback) {
+    const m = String(str).match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
     if (m) return [Number(m[1]), Number(m[2]), Number(m[3])];
-    return [245, 213, 216];
+    return fallback;
   }
 
-  const rgb = parseRgb();
+  const pinkRgb = parseRgbTriplet(cfg.color, [245, 213, 216]);
+  const cremeRgb = parseRgbTriplet(cfg.colorCreme, [250, 248, 245]);
+  const flakePalettes = [pinkRgb, cremeRgb];
 
   function resize() {
     w = canvas.width = window.innerWidth;
@@ -41,6 +42,7 @@
           (cfg.speedMin ?? 0.4) +
           Math.random() * ((cfg.speedMax ?? 1.2) - (cfg.speedMin ?? 0.4)),
         drift: (Math.random() - 0.5) * driftMax,
+        rgb: flakePalettes[Math.floor(Math.random() * flakePalettes.length)],
         opacity:
           (cfg.opacityMin ?? 0.15) +
           Math.random() * ((cfg.opacityMax ?? 0.45) - (cfg.opacityMin ?? 0.15)),
@@ -61,7 +63,7 @@
       if (p.x < 0) p.x = w;
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${p.opacity})`;
+      ctx.fillStyle = `rgba(${p.rgb[0]}, ${p.rgb[1]}, ${p.rgb[2]}, ${p.opacity})`;
       ctx.fill();
     }
     raf = requestAnimationFrame(tick);

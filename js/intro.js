@@ -19,9 +19,23 @@
   }
 
   const storageKey = cfg.seenStorageKey || "pandaRamen.introSeen";
+  const timesToShow = Math.max(1, cfg.timesToShow ?? 1);
+
+  function getIntroViewCount() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw == null || raw === "") return 0;
+      const n = parseInt(raw, 10);
+      if (Number.isFinite(n)) return n;
+      return raw === "1" ? 1 : 0;
+    } catch {
+      return 0;
+    }
+  }
+
   if (cfg.showOnce !== false) {
     try {
-      if (localStorage.getItem(storageKey) === "1") {
+      if (getIntroViewCount() >= timesToShow) {
         overlay.classList.add("is-hidden");
         main.classList.remove("is-locked");
         main.classList.add("is-ready");
@@ -36,7 +50,7 @@
   function markIntroSeen() {
     if (cfg.showOnce === false) return;
     try {
-      localStorage.setItem(storageKey, "1");
+      localStorage.setItem(storageKey, String(getIntroViewCount() + 1));
     } catch {
       /* ignore */
     }
@@ -53,6 +67,7 @@
   let finished = false;
   let startTime = Date.now();
   let maxTimer = null;
+  let holdTimer = null;
   let audioEl = null;
 
   if (fallbackTitle && cfg.fallback?.headline) {
@@ -61,6 +76,7 @@
   if (fallbackSub && cfg.fallback?.subline) {
     fallbackSub.textContent = cfg.fallback.subline;
   }
+
   const resolve = window.resolveSitePath || ((p) => p);
   const introImageKey = cfg.fallbackImageKey || "introArt";
   const introImagePath =
@@ -81,19 +97,42 @@
   const resolvedPosterSrc = resolve(rawIntroPoster);
   const hasVideo = Boolean(rawIntro);
 
+  function showFallbackScreen() {
+    if (videoWrap) videoWrap.hidden = true;
+    if (fallback) fallback.hidden = false;
+    playAudio();
+    scheduleFallbackHold();
+  }
+
+  /** Welcome screen stays up for displayMs (and at least minDurationMs), then enters site. */
+  function scheduleFallbackHold() {
+    if (holdTimer) clearTimeout(holdTimer);
+    const displayMs = cfg.fallback?.displayMs ?? 3200;
+    const minMs = cfg.minDurationMs ?? 2500;
+    const holdMs = Math.max(displayMs, minMs);
+    holdTimer = setTimeout(() => finishIntro(false), holdMs);
+  }
+
+  function scheduleVideoMaxDuration() {
+    const max = cfg.maxDurationMs ?? 0;
+    if (max > 0) {
+      maxTimer = setTimeout(() => finishIntro(false), max);
+    }
+  }
+
   if (skipBtn) {
     skipBtn.textContent = cfg.skipLabel ?? "Skip intro";
     skipBtn.hidden = !cfg.showSkipButton;
     skipBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      finishIntro();
+      finishIntro(true);
     });
   }
 
   function setupAudio() {
     const a = cfg.audio;
     if (!a?.enabled || !a.src) return null;
-    audioEl = new Audio(a.src);
+    audioEl = new Audio(resolve(a.src));
     audioEl.volume = Math.min(1, Math.max(0, a.volume ?? 0.6));
     return audioEl;
   }
@@ -101,39 +140,43 @@
   function playAudio() {
     const el = setupAudio();
     if (!el) return;
-    el.play().catch(() => {
-      /* autoplay blocked until user gesture — skip button counts */
-    });
+    el.play().catch(() => {});
   }
 
-  function finishIntro() {
+  function finishIntro(fromSkip) {
     if (finished) return;
+
+    const minMs = cfg.minDurationMs ?? 2500;
+    const elapsed = Date.now() - startTime;
+    if (!fromSkip && elapsed < minMs) {
+      setTimeout(() => finishIntro(false), minMs - elapsed);
+      return;
+    }
+
     finished = true;
     markIntroSeen();
     if (maxTimer) clearTimeout(maxTimer);
+    if (holdTimer) clearTimeout(holdTimer);
+
     if (audioEl) {
       audioEl.pause();
       audioEl = null;
     }
+
     overlay.classList.add("is-leaving");
     main.classList.remove("is-locked");
     requestAnimationFrame(() => main.classList.add("is-ready"));
+
+    const fadeMs = cfg.fadeOutMs ?? 900;
     setTimeout(() => {
       overlay.classList.add("is-hidden");
-    }, cfg.fadeOutMs ?? 900);
-    notifyMainReady();
-  }
-
-  function scheduleMaxDuration() {
-    const max = cfg.maxDurationMs ?? 0;
-    if (max > 0) {
-      maxTimer = setTimeout(finishIntro, max);
-    }
+      notifyMainReady();
+    }, fadeMs);
   }
 
   function afterMinDuration(cb) {
     const elapsed = Date.now() - startTime;
-    const min = cfg.minDurationMs ?? 0;
+    const min = cfg.minDurationMs ?? 2500;
     const wait = Math.max(0, min - elapsed);
     setTimeout(cb, wait);
   }
@@ -151,22 +194,23 @@
       video.muted = true;
     }
 
+    video.addEventListener("error", () => {
+      showFallbackScreen();
+    });
+
     video.addEventListener("loadeddata", () => {
       playAudio();
       video.play().catch(() => {});
     });
 
     video.addEventListener("ended", () => {
-      afterMinDuration(finishIntro);
+      afterMinDuration(() => finishIntro(false));
     });
 
-    scheduleMaxDuration();
-  } else if (fallback && videoWrap) {
-    videoWrap.hidden = true;
-    fallback.hidden = false;
-    playAudio();
-    scheduleMaxDuration();
+    scheduleVideoMaxDuration();
+  } else if (fallback) {
+    showFallbackScreen();
   } else {
-    finishIntro();
+    setTimeout(() => finishIntro(false), cfg.minDurationMs ?? 2500);
   }
 })();

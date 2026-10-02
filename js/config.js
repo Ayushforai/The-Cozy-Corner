@@ -66,11 +66,6 @@ window.SITE_CONFIG = {
         description: "You know this one very well by the cover.",
         url: "https://open.spotify.com/playlist/7zK2q1PREl639lNVrJt1Gg?si=ef8bb5266d4e4cef",
       },
-      {
-        label: "PUNJVB",
-        description: "P-Town Represent",
-        url: "https://open.spotify.com/playlist/69hgAuCedJPDIxch0jUBfx?si=8ac37f2c265c447e",
-      },
     ],
     tracks: [
       {
@@ -96,6 +91,17 @@ window.SITE_CONFIG = {
         description: "Mandatory ",
         url: "https://open.spotify.com/artist/69xcFpmqTOmFNOL08Bxyci?si=evS3aab_TNmAi9XEJeJWZw",
       },
+      {
+        label: "Rahat Fateh Ali Khan",
+        description: "Mandatory ",
+        url: "https://open.spotify.com/artist/3OLGltG8UPIea8sA4w0yg0?si=2rW4gcxxSSK4GNgGmz_dgg",
+      },
+      {
+        label: "Aditya Rikhari",
+        description: "Samjho Na Sahiba...",
+        url: "https://open.spotify.com/artist/3ozYqVCLohfpXIhalkhM8D?si=CFmktgpMSqSG6B0_RuyCtg"
+
+      }
     ],
   },
 
@@ -113,10 +119,30 @@ window.SITE_CONFIG = {
     headerImage: "",
   },
 
+  /**
+   * Custom note — pages/message.html
+   * Edit messagePage.body (or paragraphs) for the text inside the rounded box.
+   */
+  messagePage: {
+    title: "The Message",
+    subtitle: "",
+    headerImageKey: "messageHeader",
+    headerImage: "",
+    /**
+     * Main text in the rounded box. Use blank lines for new paragraphs,
+     * or set paragraphs: ["Line one", "Line two"] instead of body.
+     */
+    body: "Heyy! Long time since we last conversed. First of all, a dope Happy Birthday to you, Fiza. It's your day, make the most of it. I wanted to wish you in my own way (nerd shii). I made this lil space called The Cozy Corner for you, one n only. Hoping you tried the activities.\n\nNot a single day goes by when I don't wish that we'd still stay in touch and stay close like we were for those months. Us talking and spending time together was the best part of my day. I felt lotta comfort, peace and love with you. I hope I made you feel the same. \n\nWe clearly got off on the wrong foot that night. You said you were still processing your stuff and yet I failed to understand your point. I should have done better. I could've done better. Instead, I messed up big time and possibly ruined your perception of me and how you'd see me as a person. That's not who I am. \n\nIf you like then we can work things out, figure it all out to our own pace n comfort and meanwhile be each other's best friend like we were. I'm working day n night to get myself somewhere and make both of us proud. Having you by my side is no less than being the luckiest guy and I couldn't be more grateful. If you wish to rethink, do give me a call or text me and if not, then it's alright (not really tho). Even if we don't get to talking again, I'll be happy knowing that I got to make the prettiest girl smile hoping that she tried some of the things in The Cozy Corner muehehe.\n\nI miss your voice, Fiza. I miss you... ",
+    paragraphs: null,
+    footerNote: "",
+  },
+
   intro: {
     enabled: true,
-    /** After the first visit (skip or finish), intro is hidden on later loads in this browser */
+    /** When true, stop showing intro after timesToShow completes/skips in this browser */
     showOnce: true,
+    /** Full intro plays before later loads skip it (each finish or Skip counts as one) */
+    timesToShow: 2,
     seenStorageKey: "pandaRamen.introSeen",
     /** "portrait" or "landscape" for intro video frame on phones */
     orientation: "portrait",
@@ -126,7 +152,7 @@ window.SITE_CONFIG = {
     posterSrc: "",
     /** Minimum time intro stays visible (ms), even if video is shorter */
     minDurationMs: 2500,
-    /** Auto-enter site after this many ms if video hasn't ended (0 = only when video ends or skip) */
+    /** Cap for intro VIDEO only (0 = no cap). Welcome screen uses fallback.displayMs + minDurationMs. */
     maxDurationMs: 15000,
     /** Fade-out transition length (ms) */
     fadeOutMs: 900,
@@ -152,16 +178,19 @@ window.SITE_CONFIG = {
 
   snowfall: {
     enabled: true,
-    particleCount: 130,
+    particleCount: 155,
     speedMin: 0.7,
     speedMax: 2.4,
-    opacityMin: 0.25,
-    opacityMax: 0.72,
+    /** +15% visibility vs previous 0.25 / 0.72 */
+    opacityMin: 0.29,
+    opacityMax: 0.83,
     sizeMin: 1.2,
     sizeMax: 4.2,
     driftMax: 0.75,
-    /** Slightly pink-tinted flakes */
-    color: "rgba(245, 213, 216, 0.5)",
+    /** Baby pink flakes — matches theme babyPink */
+    color: "245, 213, 216",
+    /** Creme / off-white flakes — matches theme offWhite */
+    colorCreme: "250, 248, 245",
   },
 
   scrollReveal: {
@@ -191,9 +220,17 @@ window.SITE_CONFIG = {
     puzzleHeader: "assets/images/panda-paint.png",
     /** Homepage Explore card for puzzle — navCards[].imageKey: "puzzleNav" */
     puzzleNav: "assets/images/panda-cartoon.svg",
-    ramen: "assets/images/cat ramen.png",
+    /** Hero banner bowl (wiggles on homepage) — not used for nav cards */
+    ramen: "assets/images/lily.png",
+    /** Homepage Explore card for Music Lounge — homepage.navCards music.imageKey */
+    musicNav: "assets/images/cat ramen.png",
     bdaycat: "assets/images/cat-gift.png",
+    /** Music page only — musicLounge.headerImageKey (not the homepage card) */
     musicHeader: "assets/images/ramen-cartoon.svg",
+    /** Message page header — messagePage.headerImageKey */
+    messageHeader: "assets/images/panda-hand.png",
+    /** Homepage Explore card for The Message — navCards message.imageKey */
+    messageNav: "assets/images/vanilla.png",
   },
 
   /**
@@ -327,7 +364,15 @@ window.SITE_CONFIG = {
         description: "Audible vibes for slurping and studying.",
         href: "pages/music.html",
         accent: "pink",
-        imageKey: "ramen",
+        imageKey: "musicNav",
+      },
+      {
+        id: "message",
+        label: "The Message",
+        description: "A note just for you.",
+        href: "pages/message.html",
+        accent: "red",
+        imageKey: "messageNav",
       },
     ],
     footerNote: "Made with extra noodles · Lots of love n blessings · By the one you know :3",

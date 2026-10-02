@@ -156,6 +156,20 @@ body {
   transform: translateX(-50%) scale(1.03);
 }
 
+/* —— Message page —— */
+.page-message {
+  max-width: 100%;
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.page-message__header img {
+  width: 72px;
+}
+
+.message-box {
+  padding: 1.35rem 1.15rem;
+}
+
 /* —— Video page —— */
 .page-video {
   max-width: 100%;
