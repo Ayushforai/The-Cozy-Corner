@@ -151,10 +151,16 @@ window.SITE_CONFIG = {
 
   intro: {
     enabled: true,
-    /** When true, stop showing intro after timesToShow completes/skips in this browser */
+    /**
+     * Homepage visit pattern — "alternate": show intro on visits 1, 3, 5… skip on 2, 4, 6…
+     * Set showOnce: false to show the intro on every homepage load.
+     */
     showOnce: true,
-    /** Full intro plays before later loads skip it (each finish or Skip counts as one) */
+    visitPattern: "alternate",
+    visitStorageKey: "pandaRamen.introHomeVisits",
+    /** Legacy keys (unused when visitPattern is "alternate") */
     timesToShow: 2,
+    resetAfterHours: 7,
     seenStorageKey: "pandaRamen.introSeen",
     /** "portrait" or "landscape" for intro video frame on phones */
     orientation: "portrait",
@@ -164,6 +170,8 @@ window.SITE_CONFIG = {
     posterSrc: "",
     /** Minimum time intro stays visible (ms), even if video is shorter */
     minDurationMs: 2500,
+    /** Phones: keep welcome up at least this long (also see fallback.mobileDisplayMs) */
+    mobileMinDurationMs: 4500,
     /** Cap for intro VIDEO only (0 = no cap). Welcome screen uses fallback.displayMs + minDurationMs. */
     maxDurationMs: 15000,
     /** Fade-out transition length (ms) */
@@ -175,6 +183,8 @@ window.SITE_CONFIG = {
       subline: "What's next is gonna be LEGEN-DARRYYY",
       /** Duration of fallback animation before allowing enter (ms) */
       displayMs: 3200,
+      /** Phones: wait longer before auto-entering the site */
+      mobileDisplayMs: 5500,
     },
     /** Key in images.* for intro cartoon (e.g. introArt) */
     fallbackImageKey: "introArt",

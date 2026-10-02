@@ -4,6 +4,20 @@
   const main = document.getElementById("main-app");
   if (!overlay || !main) return;
 
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+  function dismissIntroImmediately() {
+    overlay.classList.remove("intro-pending");
+    overlay.classList.add("is-hidden");
+    main.classList.remove("is-locked");
+    main.classList.add("is-ready");
+    notifyMainReady();
+  }
+
+  function revealIntroOverlay() {
+    overlay.classList.remove("intro-pending");
+  }
+
   function notifyMainReady() {
     requestAnimationFrame(() => {
       document.dispatchEvent(new CustomEvent("main-app-ready"));
@@ -11,49 +25,50 @@
   }
 
   if (!cfg?.enabled) {
-    overlay.classList.add("is-hidden");
-    main.classList.remove("is-locked");
-    main.classList.add("is-ready");
-    notifyMainReady();
+    dismissIntroImmediately();
     return;
   }
 
-  const storageKey = cfg.seenStorageKey || "pandaRamen.introSeen";
-  const timesToShow = Math.max(1, cfg.timesToShow ?? 1);
+  const visitKey = cfg.visitStorageKey || "pandaRamen.introHomeVisits";
+  const visitPattern = cfg.visitPattern || "alternate";
 
-  function getIntroViewCount() {
+  function readHomeVisitCount() {
     try {
-      const raw = localStorage.getItem(storageKey);
-      if (raw == null || raw === "") return 0;
-      const n = parseInt(raw, 10);
-      if (Number.isFinite(n)) return n;
-      return raw === "1" ? 1 : 0;
+      const n = parseInt(localStorage.getItem(visitKey), 10);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
     } catch {
       return 0;
     }
   }
 
-  if (cfg.showOnce !== false) {
+  function writeHomeVisitCount(n) {
     try {
-      if (getIntroViewCount() >= timesToShow) {
-        overlay.classList.add("is-hidden");
-        main.classList.remove("is-locked");
-        main.classList.add("is-ready");
-        notifyMainReady();
-        return;
-      }
+      localStorage.setItem(visitKey, String(n));
     } catch {
-      /* private mode / blocked storage — show intro each time */
+      /* private mode — show intro each time */
     }
   }
 
-  function markIntroSeen() {
-    if (cfg.showOnce === false) return;
+  /** Returns true when the welcome intro should run on this homepage load. */
+  function shouldShowIntroThisVisit() {
+    if (cfg.showOnce === false) return true;
+    if (visitPattern !== "alternate") return true;
     try {
-      localStorage.setItem(storageKey, String(getIntroViewCount() + 1));
+      const visitNumber = readHomeVisitCount() + 1;
+      writeHomeVisitCount(visitNumber);
+      return visitNumber % 2 === 1;
     } catch {
-      /* ignore */
+      return true;
     }
+  }
+
+  if (!shouldShowIntroThisVisit()) {
+    dismissIntroImmediately();
+    return;
+  }
+
+  function markIntroSeen() {
+    /* Visit count already recorded in shouldShowIntroThisVisit */
   }
 
   const video = document.getElementById("intro-video");
@@ -68,7 +83,47 @@
   let startTime = Date.now();
   let maxTimer = null;
   let holdTimer = null;
+  let holdUntil = 0;
   let audioEl = null;
+
+  function getMinDurationMs() {
+    let minMs = cfg.minDurationMs ?? 2500;
+    if (isMobile) {
+      minMs = Math.max(minMs, cfg.mobileMinDurationMs ?? 4500);
+    }
+    return minMs;
+  }
+
+  function getFallbackHoldMs() {
+    const displayMs = cfg.fallback?.displayMs ?? 3200;
+    let display = displayMs;
+    if (isMobile) {
+      display = Math.max(displayMs, cfg.fallback?.mobileDisplayMs ?? 5500);
+    }
+    return Math.max(display, getMinDurationMs());
+  }
+
+  function clearHoldTimer() {
+    if (holdTimer) {
+      clearTimeout(holdTimer);
+      holdTimer = null;
+    }
+  }
+
+  function scheduleHoldExpiry() {
+    clearHoldTimer();
+    const remaining = Math.max(0, holdUntil - Date.now());
+    if (remaining <= 0) {
+      finishIntro(false);
+      return;
+    }
+    holdTimer = setTimeout(scheduleHoldExpiry, remaining);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (finished || document.hidden || !holdUntil) return;
+    scheduleHoldExpiry();
+  });
 
   if (fallbackTitle && cfg.fallback?.headline) {
     fallbackTitle.textContent = cfg.fallback.headline;
@@ -100,17 +155,16 @@
   function showFallbackScreen() {
     if (videoWrap) videoWrap.hidden = true;
     if (fallback) fallback.hidden = false;
+    startTime = Date.now();
     playAudio();
     scheduleFallbackHold();
   }
 
   /** Welcome screen stays up for displayMs (and at least minDurationMs), then enters site. */
   function scheduleFallbackHold() {
-    if (holdTimer) clearTimeout(holdTimer);
-    const displayMs = cfg.fallback?.displayMs ?? 3200;
-    const minMs = cfg.minDurationMs ?? 2500;
-    const holdMs = Math.max(displayMs, minMs);
-    holdTimer = setTimeout(() => finishIntro(false), holdMs);
+    clearHoldTimer();
+    holdUntil = Date.now() + getFallbackHoldMs();
+    scheduleHoldExpiry();
   }
 
   function scheduleVideoMaxDuration() {
@@ -146,7 +200,7 @@
   function finishIntro(fromSkip) {
     if (finished) return;
 
-    const minMs = cfg.minDurationMs ?? 2500;
+    const minMs = getMinDurationMs();
     const elapsed = Date.now() - startTime;
     if (!fromSkip && elapsed < minMs) {
       setTimeout(() => finishIntro(false), minMs - elapsed);
@@ -156,7 +210,8 @@
     finished = true;
     markIntroSeen();
     if (maxTimer) clearTimeout(maxTimer);
-    if (holdTimer) clearTimeout(holdTimer);
+    clearHoldTimer();
+    holdUntil = 0;
 
     if (audioEl) {
       audioEl.pause();
@@ -176,10 +231,12 @@
 
   function afterMinDuration(cb) {
     const elapsed = Date.now() - startTime;
-    const min = cfg.minDurationMs ?? 2500;
+    const min = getMinDurationMs();
     const wait = Math.max(0, min - elapsed);
     setTimeout(cb, wait);
   }
+
+  revealIntroOverlay();
 
   if (hasVideo && video && videoWrap && fallback) {
     fallback.hidden = true;
@@ -211,6 +268,6 @@
   } else if (fallback) {
     showFallbackScreen();
   } else {
-    setTimeout(() => finishIntro(false), cfg.minDurationMs ?? 2500);
+    setTimeout(() => finishIntro(false), getMinDurationMs());
   }
 })();
