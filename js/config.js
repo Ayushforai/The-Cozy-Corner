@@ -5,7 +5,7 @@
 window.SITE_CONFIG = {
   site: {
     title: "The Cozy Corner",
-    tagline: "Cozy corners, noodle adventures",
+    tagline: "Cozy Setbacks, Ramen Adventures",
   },
 
   theme: {
@@ -144,7 +144,7 @@ window.SITE_CONFIG = {
      * Main text in the rounded box. Use blank lines for new paragraphs,
      * or set paragraphs: ["Line one", "Line two"] instead of body.
      */
-    body: "Heyy! Long time since we last conversed. First of all, Janmdin Mubarak apko, Fiza. 🎉 It's your day, make the most of it. I wanted to wish you in my own way (nerd shii). I made this lil space called The Cozy Corner for you, one n only. Hoping you tried the activities. 🐼\n\nNot a single day goes by when I don't wish that we'd still stay in touch and stay close like we were for those months. 🌇 Us talking and spending time together was the best part of my day. I felt lotta comfort, peace and love with you. I hope I made you feel the same. 🤞🏻\n\nWe clearly got off on the wrong foot that night. You said you were still processing your stuff and yet I failed to understand your point. I could've done better. I should've done better. 🤦🏻 Instead, I messed up big time and possibly ruined your perception of me and how you'd see me as a person. That's not who I am. \n\nIf you like then we can work things out, figure it all out to our own pace n comfort and meanwhile be each other's best friend like we were. I'm working day n night to get myself somewhere and make both of us proud. 🤞🏻 Having you by my side is no less than being the luckiest guy and I couldn't be more grateful. If you wish to rethink about me, do give me a call or text me and if not, then it's alright (not really tho). 😿 Even if we don't get to talking again, I'll be happy knowing that I got to make the prettiest girl smile hoping that she tried some of the things in The Cozy Corner muehehe.\n\nI miss your voice, Fiza. I miss you... 🤍",
+    body: "Heyy! Long time since we last conversed. First of all, Janmdin Mubarak apko, Fiza. 🎉 It's your day, make the most of it. I wanted to wish you in my own way (nerd shii). I made this lil space called The Cozy Corner for you, one n only. Hoping you tried the activities. 🐼\n\nNot a single day goes by when I don't wish that we'd still stay in touch and stay close like we were for those months. 🌇 Us talking and spending time together was the best part of my day. I felt lotta comfort, peace and love with you. I hope I made you feel the same. 🥢\n\nWe clearly got off on the wrong foot that night. You said you were still processing your stuff and yet I failed to understand your point. I could've done better. I should've done better. 🤦🏻 Instead, I messed up big time and possibly ruined your perception of me and how you'd see me as a person. That's not who I am. \n\nIf you like then we can work things out, figure it all out to our own pace n comfort and meanwhile be each other's best friend like we were. I'm working day n night to get myself somewhere and make both of us proud. 🤞🏻 Having you by my side is no less than being the luckiest guy and I couldn't be more grateful. If you wish to rethink about me, do give me a call or text me and if not, then it's alright (not really tho) :/  Even if we don't get to talking again, I'll be happy knowing that I got to make the prettiest girl smile hoping that she tried some of the things in The Cozy Corner muehehe.\n\nI miss your voice, Fiza. I miss you... 🤍",
     paragraphs: null,
     footerNote: "",
   },
@@ -387,6 +387,6 @@ window.SITE_CONFIG = {
         imageKey: "messageNav",
       },
     ],
-    footerNote: "Made with extra noodles · Lots of love n blessings · By the one you know :3",
+    footerNote: "Made with extra corn dogs · Lots of love n blessings · By Ayush :3",
   },
 };
