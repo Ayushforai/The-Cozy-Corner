@@ -22,9 +22,6 @@
   const playBtnText = document.getElementById("video-play-btn-text");
   const playBtnIcon = document.getElementById("video-play-btn-icon");
   const audioStrip = document.getElementById("video-audio-strip");
-  const audioBtn = document.getElementById("video-audio-btn");
-  const audioBtnText = document.getElementById("video-audio-btn-text");
-  const audioHint = document.getElementById("video-audio-hint");
 
   if (titleEl && lounge.title) titleEl.textContent = lounge.title;
   if (subEl && lounge.subtitle) subEl.textContent = lounge.subtitle;
@@ -62,16 +59,6 @@
     audioEl.loop = Boolean(lounge.loop);
   }
 
-  function updateAudioButton() {
-    if (!audioBtn || !audioBtnText || !audioEl) return;
-    const playing = !audioEl.paused && !audioEl.ended;
-    audioBtn.classList.toggle("is-playing", playing);
-    audioBtn.setAttribute("aria-pressed", playing ? "true" : "false");
-    audioBtnText.textContent = playing
-      ? audioCfg.pauseLabel || "Pause soundtrack"
-      : audioCfg.playLabel || "Play soundtrack";
-  }
-
   function syncAudioToVideo() {
     if (!audioEl || !video) return;
     if (Number.isFinite(video.currentTime)) {
@@ -82,57 +69,12 @@
   function playAudioSynced() {
     if (!audioEl) return Promise.resolve();
     syncAudioToVideo();
-    return audioEl.play().then(updateAudioButton).catch(() => {
-      if (audioHint && audioCfg.hintAutoplayBlocked) {
-        audioHint.textContent = audioCfg.hintAutoplayBlocked;
-        audioHint.hidden = false;
-      }
-      updateAudioButton();
-    });
+    return audioEl.play().catch(() => {});
   }
 
   function pauseAudioTrack() {
     if (!audioEl) return;
     audioEl.pause();
-    updateAudioButton();
-  }
-
-  function initAudioUi() {
-    if (!audioEl || !audioStrip || !audioBtn) return;
-    audioStrip.hidden = false;
-    updateAudioButton();
-
-    audioBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (audioEl.paused || audioEl.ended) {
-        if (audioEl.ended) audioEl.currentTime = 0;
-        syncAudioToVideo();
-        audioEl.play().then(() => {
-          if (audioHint) audioHint.hidden = true;
-          updateAudioButton();
-        }).catch(() => {
-          if (audioHint && audioCfg.hintAutoplayBlocked) {
-            audioHint.textContent = audioCfg.hintAutoplayBlocked;
-            audioHint.hidden = false;
-          }
-        });
-      } else {
-        pauseAudioTrack();
-      }
-    });
-
-    if (audioCfg.autoplayOnVisit !== false) {
-      audioEl.play().then(() => {
-        if (audioHint) audioHint.hidden = true;
-        updateAudioButton();
-      }).catch(() => {
-        if (audioHint && audioCfg.hintAutoplayBlocked) {
-          audioHint.textContent = audioCfg.hintAutoplayBlocked;
-          audioHint.hidden = false;
-        }
-        updateAudioButton();
-      });
-    }
   }
 
   if (!rawSrc) {
@@ -142,7 +84,6 @@
     }
     playOverlay?.classList.add("is-hidden");
     if (playBtn) playBtn.disabled = true;
-    if (audioEl) initAudioUi();
     return;
   }
 
@@ -277,7 +218,7 @@
   });
 
   video.addEventListener("seeked", () => {
-    if (hasSeparateAudio && !video.paused) {
+    if (hasSeparateAudio) {
       syncAudioToVideo();
     }
   });
@@ -312,7 +253,8 @@
   }
 
   if (audioEl) {
-    initAudioUi();
+    /* Strip stays hidden — soundtrack follows video only */
+    if (audioStrip) audioStrip.hidden = true;
   }
 
   if (Boolean(lounge.autoplayMuted)) {
