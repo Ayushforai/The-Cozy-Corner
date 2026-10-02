@@ -1,6 +1,7 @@
 (function initVideoLounge() {
   const lounge = window.SITE_CONFIG?.videoLounge ?? {};
   const videos = window.SITE_CONFIG?.videos ?? {};
+  const audioCfg = lounge.audio ?? {};
   const resolve = window.resolveSitePath || ((p) => p);
 
   const rawSrc = lounge.videoSrc || videos.loungeSrc || "";
@@ -14,13 +15,16 @@
   const subEl = document.getElementById("video-page-sub");
   const mascotEl = document.getElementById("video-page-mascot");
   const noteEl = document.getElementById("video-page-note");
-  const stage = document.getElementById("video-stage");
   const video = document.getElementById("lounge-video");
   const playOverlay = document.getElementById("video-play-overlay");
   const overlayLabel = document.getElementById("video-overlay-label");
   const playBtn = document.getElementById("video-play-btn");
   const playBtnText = document.getElementById("video-play-btn-text");
   const playBtnIcon = document.getElementById("video-play-btn-icon");
+  const audioStrip = document.getElementById("video-audio-strip");
+  const audioBtn = document.getElementById("video-audio-btn");
+  const audioBtnText = document.getElementById("video-audio-btn-text");
+  const audioHint = document.getElementById("video-audio-hint");
 
   if (titleEl && lounge.title) titleEl.textContent = lounge.title;
   if (subEl && lounge.subtitle) subEl.textContent = lounge.subtitle;
@@ -46,6 +50,91 @@
     );
   }
 
+  const hasSeparateAudio =
+    Boolean(audioCfg.enabled && audioCfg.src) &&
+    audioCfg.useSeparateTrack !== false;
+
+  let audioEl = null;
+  if (audioCfg.enabled && audioCfg.src) {
+    audioEl = new Audio(resolve(audioCfg.src));
+    audioEl.volume = Math.min(1, Math.max(0, audioCfg.volume ?? 0.85));
+    audioEl.preload = "auto";
+    audioEl.loop = Boolean(lounge.loop);
+  }
+
+  function updateAudioButton() {
+    if (!audioBtn || !audioBtnText || !audioEl) return;
+    const playing = !audioEl.paused && !audioEl.ended;
+    audioBtn.classList.toggle("is-playing", playing);
+    audioBtn.setAttribute("aria-pressed", playing ? "true" : "false");
+    audioBtnText.textContent = playing
+      ? audioCfg.pauseLabel || "Pause soundtrack"
+      : audioCfg.playLabel || "Play soundtrack";
+  }
+
+  function syncAudioToVideo() {
+    if (!audioEl || !video) return;
+    if (Number.isFinite(video.currentTime)) {
+      audioEl.currentTime = video.currentTime;
+    }
+  }
+
+  function playAudioSynced() {
+    if (!audioEl) return Promise.resolve();
+    syncAudioToVideo();
+    return audioEl.play().then(updateAudioButton).catch(() => {
+      if (audioHint && audioCfg.hintAutoplayBlocked) {
+        audioHint.textContent = audioCfg.hintAutoplayBlocked;
+        audioHint.hidden = false;
+      }
+      updateAudioButton();
+    });
+  }
+
+  function pauseAudioTrack() {
+    if (!audioEl) return;
+    audioEl.pause();
+    updateAudioButton();
+  }
+
+  function initAudioUi() {
+    if (!audioEl || !audioStrip || !audioBtn) return;
+    audioStrip.hidden = false;
+    updateAudioButton();
+
+    audioBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (audioEl.paused || audioEl.ended) {
+        if (audioEl.ended) audioEl.currentTime = 0;
+        syncAudioToVideo();
+        audioEl.play().then(() => {
+          if (audioHint) audioHint.hidden = true;
+          updateAudioButton();
+        }).catch(() => {
+          if (audioHint && audioCfg.hintAutoplayBlocked) {
+            audioHint.textContent = audioCfg.hintAutoplayBlocked;
+            audioHint.hidden = false;
+          }
+        });
+      } else {
+        pauseAudioTrack();
+      }
+    });
+
+    if (audioCfg.autoplayOnVisit !== false) {
+      audioEl.play().then(() => {
+        if (audioHint) audioHint.hidden = true;
+        updateAudioButton();
+      }).catch(() => {
+        if (audioHint && audioCfg.hintAutoplayBlocked) {
+          audioHint.textContent = audioCfg.hintAutoplayBlocked;
+          audioHint.hidden = false;
+        }
+        updateAudioButton();
+      });
+    }
+  }
+
   if (!rawSrc) {
     if (noteEl) {
       noteEl.innerHTML =
@@ -53,6 +142,7 @@
     }
     playOverlay?.classList.add("is-hidden");
     if (playBtn) playBtn.disabled = true;
+    if (audioEl) initAudioUi();
     return;
   }
 
@@ -70,9 +160,13 @@
   video.playsInline = true;
   video.setAttribute("playsinline", "");
   video.preload = lounge.preload || "auto";
+  if (hasSeparateAudio) {
+    video.muted = true;
+  }
   video.load();
 
   let hasStarted = false;
+  let lastSyncAt = 0;
 
   function showStartOverlay() {
     playOverlay?.classList.remove("is-hidden");
@@ -106,7 +200,11 @@
   }
 
   function playWithSound() {
-    video.muted = false;
+    if (hasSeparateAudio) {
+      video.muted = true;
+    } else {
+      video.muted = false;
+    }
     const attempt = video.play();
     if (attempt && typeof attempt.then === "function") {
       attempt
@@ -114,6 +212,10 @@
           hasStarted = true;
           hideStartOverlay();
           syncPlayButton();
+          if (hasSeparateAudio) {
+            return playAudioSynced();
+          }
+          return undefined;
         })
         .catch(() => {
           showLoadError("Playback blocked or failed. Click Play again, or use the controls on the video.");
@@ -147,10 +249,16 @@
     hasStarted = true;
     hideStartOverlay();
     syncPlayButton();
+    if (hasSeparateAudio) {
+      playAudioSynced();
+    }
   });
 
   video.addEventListener("pause", () => {
     syncPlayButton();
+    if (hasSeparateAudio) {
+      pauseAudioTrack();
+    }
     if (video.ended) {
       showStartOverlay();
     } else if (!hasStarted) {
@@ -162,7 +270,26 @@
 
   video.addEventListener("ended", () => {
     syncPlayButton();
+    if (hasSeparateAudio) {
+      pauseAudioTrack();
+    }
     showStartOverlay();
+  });
+
+  video.addEventListener("seeked", () => {
+    if (hasSeparateAudio && !video.paused) {
+      syncAudioToVideo();
+    }
+  });
+
+  video.addEventListener("timeupdate", () => {
+    if (!hasSeparateAudio || !audioEl || video.paused) return;
+    const now = Date.now();
+    if (now - lastSyncAt < 400) return;
+    lastSyncAt = now;
+    if (Math.abs(audioEl.currentTime - video.currentTime) > 0.35) {
+      syncAudioToVideo();
+    }
   });
 
   video.addEventListener("error", () => {
@@ -175,8 +302,17 @@
   syncPlayButton();
 
   if (noteEl) {
-    noteEl.textContent =
-      "Click Play to start. Use the bar on the video for volume, timeline, and fullscreen.";
+    if (hasSeparateAudio) {
+      noteEl.textContent =
+        "Play the video when you're ready — the soundtrack stays in sync. Use the video bar for timeline and fullscreen.";
+    } else {
+      noteEl.textContent =
+        "Click Play to start. Use the bar on the video for volume, timeline, and fullscreen.";
+    }
+  }
+
+  if (audioEl) {
+    initAudioUi();
   }
 
   if (Boolean(lounge.autoplayMuted)) {
@@ -187,6 +323,10 @@
         hasStarted = true;
         hideStartOverlay();
         syncPlayButton();
+        if (hasSeparateAudio) {
+          return playAudioSynced();
+        }
+        return undefined;
       })
       .catch(showStartOverlay);
   }
